@@ -6,7 +6,8 @@ import playerRoutes from './routes/playerRoutes.js';
 import addfight from './routes/fightRoutes.js';
 import getfights from './routes/fightRoutes.js';
 import { errorHandler } from './middleware/errorMiddleware.js';
-
+import topTeamController from './routes/teamRoutes.js';
+import AddTeamController from './routes/teamRoutes.js';
 dotenv.config();
 
 connectDB();
@@ -21,6 +22,9 @@ app.use(express.json());
 app.use('/api/players', playerRoutes);
 app.use('/api/fight', addfight);
 app.use('/api/fights', getfights);
+app.use('/api/team', topTeamController);
+app.use('/api/team', AddTeamController);
+
 app.use(errorHandler);
 const PORT = process.env.PORT || 5000;
 

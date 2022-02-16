@@ -7,12 +7,14 @@ import {
   updatePlayerfightReducer,
 } from './reducers/playerReducer';
 import { fightResultCreateReducer } from './reducers/fightReducer';
-
+import { addTeamReducer, listTopTeamReducer } from './reducers/teamReducer';
 const reducer = combineReducers({
   addFight: addFightReducer,
   listPlayers: listPlayerReducer,
   updatePlayer: updatePlayerfightReducer,
   fightResult: fightResultCreateReducer,
+  addTeam: addTeamReducer,
+  topTeams: listTopTeamReducer,
 });
 
 const initialState = { addFight: {}, listPlayers: {} };

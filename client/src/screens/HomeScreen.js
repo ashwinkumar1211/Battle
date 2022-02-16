@@ -8,6 +8,7 @@ import {
   listPlayersAll,
   updatePlayerScore,
 } from '../actions/playerActions';
+import { createTeam, listTopTeams } from '../actions/teamActions';
 import { createFight, listFights } from '../actions/fightActions';
 import Message from '../components/Message';
 import Loader from '../components/Loader';
@@ -17,6 +18,7 @@ import PlayerForm from '../components/PlayerForm';
 import { useDispatch, useSelector } from 'react-redux';
 import 'bootstrap/js/src/collapse.js';
 import { Table } from 'react-bootstrap';
+import win from '../win.gif';
 
 const HomeScreen = () => {
   const [playername, setPlayerName] = useState('');
@@ -48,11 +50,22 @@ const HomeScreen = () => {
       players && players.find(player => player.playername === playeronename);
     const searchteamtwo =
       players && players.find(player => player.playername === playertwoname);
-
+    console.log(searchteamone, searchteamtwo);
     dispatch(createFight({ playeronename, playertwoname, teamname, ties }));
     const winnerId = searchteamone._id;
     const loserId = searchteamtwo._id;
+
     if (ties === false) {
+      dispatch(
+        createTeam({
+          _id: winnerId,
+          teamname: searchteamone.teamname,
+          score: searchteamone.score,
+          wins: searchteamone.wins,
+          losses: searchteamone.losses,
+          ties: searchteamone.ties,
+        })
+      );
       dispatch(
         updatePlayerScore({
           _id: winnerId,
@@ -60,6 +73,16 @@ const HomeScreen = () => {
           wins: 1,
           losses: 0,
           ties: 0,
+        })
+      );
+      dispatch(
+        createTeam({
+          _id: loserId,
+          teamname: searchteamtwo.teamname,
+          score: searchteamtwo.score,
+          wins: searchteamtwo.wins,
+          losses: searchteamtwo.losses,
+          ties: searchteamtwo.ties,
         })
       );
       dispatch(
@@ -74,6 +97,26 @@ const HomeScreen = () => {
     }
 
     if (ties === true) {
+      dispatch(
+        createTeam({
+          _id: winnerId,
+          teamname: searchteamone.teamname,
+          score: searchteamone.score,
+          wins: searchteamone.wins,
+          losses: searchteamone.losses,
+          ties: searchteamone.ties,
+        })
+      );
+      dispatch(
+        createTeam({
+          _id: loserId,
+          teamname: searchteamtwo.teamname,
+          score: searchteamtwo.score,
+          wins: searchteamtwo.wins,
+          losses: searchteamtwo.losses,
+          ties: searchteamtwo.ties,
+        })
+      );
       dispatch(
         updatePlayerScore({
           _id: winnerId,
@@ -97,6 +140,11 @@ const HomeScreen = () => {
 
   const listPlayers = useSelector(state => state.listPlayers);
   var { loading, error, players } = listPlayers;
+
+  const topTeams = useSelector(state => state.topTeams);
+  var { teams } = topTeams;
+  const teamslist = teams && teams.map(team => team.teamname);
+  const topTwo = Object.values({ ...teamslist });
 
   const playerslist = players && players.map(player => player.playername);
 
@@ -147,11 +195,37 @@ const HomeScreen = () => {
     dispatch(listPlayersAll());
     // console.log(searchParams.get('pageNumber'));
     dispatch(listFights());
+    dispatch(listTopTeams());
   }, []);
 
   return (
     <>
       <Container className='mb-3'>
+        <img
+          src={win}
+          alt='loading...'
+          className='mt-2'
+          style={{
+            height: '5em',
+          }}
+        />
+        <Table striped bordered hover responsive className='table-sm mt-3'>
+          <thead>
+            <tr>
+              <th>TEAMNAME</th>
+              <th>SCORE</th>
+            </tr>
+          </thead>
+          <tbody>
+            {teams &&
+              teams.map(team => (
+                <tr key={team._id}>
+                  <td>{team.teamname}</td>
+                  <td>{team.score}</td>
+                </tr>
+              ))}
+          </tbody>
+        </Table>
         <h3 className='mt-2'>ADD PLAYER</h3>
         {error && <Message variant='danger'>{error}</Message>}
         {loading && <Loader />}
@@ -218,6 +292,7 @@ const HomeScreen = () => {
             Fight!
           </Button>
         </Form>
+        <h3 className='mt-3'>DASHBOARD</h3>
         <Table striped bordered hover responsive className='table-sm mt-3'>
           <thead>
             <tr>
