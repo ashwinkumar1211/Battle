@@ -65,7 +65,7 @@ export const updatePlayerScore = player => async (dispatch, getState) => {
     };
 
     const { data } = await axios.put(
-      `/api/player/${player._id}`,
+      `/api/players/player/${player._id}`,
       player,
       config
     );

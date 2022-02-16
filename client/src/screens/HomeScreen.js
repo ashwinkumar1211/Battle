@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { Link, useNavigate, useLocation, useParams } from 'react-router-dom';
 import { Form, Button, Row, Col } from 'react-bootstrap';
 import { Container } from 'react-bootstrap';
@@ -7,13 +8,15 @@ import {
   listPlayersAll,
   updatePlayerScore,
 } from '../actions/playerActions';
-import { createFight } from '../actions/fightActions';
+import { createFight, listFights } from '../actions/fightActions';
 import Message from '../components/Message';
 import Loader from '../components/Loader';
 import BootstrapTable from 'react-bootstrap-table-next';
 import 'react-bootstrap-table-next/dist/react-bootstrap-table2.min.css';
 import PlayerForm from '../components/PlayerForm';
 import { useDispatch, useSelector } from 'react-redux';
+import 'bootstrap/js/src/collapse.js';
+import { Table } from 'react-bootstrap';
 
 const HomeScreen = () => {
   const [playername, setPlayerName] = useState('');
@@ -41,8 +44,55 @@ const HomeScreen = () => {
     const teamname =
       result === 'tie' ? oldvalue + '' + oldvalue2 : searchteam.teamname;
     const ties = result === 'tie' ? true : false;
+    const searchteamone =
+      players && players.find(player => player.playername === playeronename);
+    const searchteamtwo =
+      players && players.find(player => player.playername === playertwoname);
 
     dispatch(createFight({ playeronename, playertwoname, teamname, ties }));
+    const winnerId = searchteamone._id;
+    const loserId = searchteamtwo._id;
+    if (ties === false) {
+      dispatch(
+        updatePlayerScore({
+          _id: winnerId,
+          score: 2,
+          wins: 1,
+          losses: 0,
+          ties: 0,
+        })
+      );
+      dispatch(
+        updatePlayerScore({
+          _id: loserId,
+          score: 0,
+          wins: 0,
+          losses: 1,
+          ties: 0,
+        })
+      );
+    }
+
+    if (ties === true) {
+      dispatch(
+        updatePlayerScore({
+          _id: winnerId,
+          score: 1,
+          wins: 0,
+          losses: 0,
+          ties: 1,
+        })
+      );
+      dispatch(
+        updatePlayerScore({
+          _id: loserId,
+          score: 1,
+          wins: 0,
+          losses: 0,
+          ties: 1,
+        })
+      );
+    }
   };
 
   const listPlayers = useSelector(state => state.listPlayers);
@@ -91,8 +141,12 @@ const HomeScreen = () => {
     );
   });
 
+  // const [searchParams] = useSearchParams();
+
   useEffect(() => {
     dispatch(listPlayersAll());
+    // console.log(searchParams.get('pageNumber'));
+    dispatch(listFights());
   }, []);
 
   return (
@@ -164,6 +218,31 @@ const HomeScreen = () => {
             Fight!
           </Button>
         </Form>
+        <Table striped bordered hover responsive className='table-sm mt-3'>
+          <thead>
+            <tr>
+              <th>TEAMNAME</th>
+              <th>PLAYERNAME</th>
+              <th>WINS</th>
+              <th>LOSSES</th>
+              <th>TIES</th>
+              <th>SCORE</th>
+            </tr>
+          </thead>
+          <tbody>
+            {players &&
+              players.map(player => (
+                <tr key={player._id}>
+                  <td>{player.teamname}</td>
+                  <td>{player.playername}</td>
+                  <td>{player.wins}</td>
+                  <td>{player.losses}</td>
+                  <td>{player.ties}</td>
+                  <td>{player.score}</td>
+                </tr>
+              ))}
+          </tbody>
+        </Table>
       </Container>
     </>
   );

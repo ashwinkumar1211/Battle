@@ -27,4 +27,24 @@ const listPlayers = asyncHandler(async (req, res) => {
   res.json(players);
 });
 
-export { createPlayer, listPlayers };
+//@desc Update player score
+//@route put /api/players/:id
+//@access public
+const updatePlayerScore = asyncHandler(async (req, res) => {
+  const { score, wins, losses, ties } = req.body;
+  const player = await Player.findById(req.params.id);
+  if (player) {
+    player.score = player.score + score;
+    player.wins = player.wins + wins;
+    player.losses = player.losses + losses;
+    player.ties = player.ties + ties;
+    const updatedPlayer = await player.save();
+
+    res.json(updatedPlayer);
+  } else {
+    res.status(404);
+    throw new Error('Player not found');
+  }
+});
+
+export { createPlayer, listPlayers, updatePlayerScore };
